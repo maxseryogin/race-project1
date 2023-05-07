@@ -46,9 +46,9 @@ def pause_game():
                 elif event.key == K_ESCAPE:
                     terminate()
         if paused:
-            windowSurface.fill((0,0,0))
+            windowSurface.fill((250,100,0))
             drawText('Пауза', font, windowSurface, (WINDOWWIDTH / 3), (WINDOWHEIGHT / 3))
-            drawText('Нажмите 4 чтобы продолжить или Q чтобы выйти в главное меню', font, windowSurface, (WINDOWWIDTH / 3) - 110, (WINDOWHEIGHT / 3) + 50)
+            drawText('Нажмите 4 чтобы продолжить или ESC чтобы выйти в главное меню', font, windowSurface, (WINDOWWIDTH / 3) - 110, (WINDOWHEIGHT / 3) + 50)
         pygame.display.update()
         mainClock.tick(FPS)
 pygame.init()
