@@ -48,10 +48,14 @@ def pause_game():
         if paused:
             windowSurface.fill((0,0,0))
             drawText('Пауза', font, windowSurface, (WINDOWWIDTH / 3), (WINDOWHEIGHT / 3))
-            drawText('Нажмите 4 чтобы продолжить или Q чтобы выйти в главное меню', font, windowSurface, (WINDOWWIDTH / 3) - 110, (WINDOWHEIGHT / 3) + 50)
+            drawText('Нажмите 4 чтобы продолжить или ESC чтобы выйти в главное меню', font, windowSurface, (WINDOWWIDTH / 3) - 110, (WINDOWHEIGHT / 3) + 50)
         pygame.display.update()
         mainClock.tick(FPS)
 pygame.init()
+pygame.mixer.init()
+music_files = ['music/music1.mp3','music/music2.mp3','music/music3.mp3','music/music4.mp3','music/music5.mp3','music/music6.mp3','music/music7.mp3','music/music8.mp3','music/music9.mp3','music/music10.mp3','music/music11.mp3']
+current_track_index = 0
+pygame.mixer.music.load(music_files[current_track_index])
 mainClock = pygame.time.Clock()
 windowSurface = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
 pygame.display.set_caption('Гонки')
@@ -61,9 +65,12 @@ gameOverSound = pygame.mixer.Sound('music/crash.wav')
 pygame.mixer.music.load('music/car.mp3')
 laugh = pygame.mixer.Sound('music/lose.mp3')
 playerImage = pygame.image.load('image/car1.png')
+playerRect = playerImage.get_rect()
+new_width = playerRect.width - 10
+new_height = playerRect.height - 10
+playerImage = pygame.transform.scale(playerImage, (new_width, new_height))
 car3 = pygame.image.load('image/car3.png')
 car4 = pygame.image.load('image/car4.png')
-playerRect = playerImage.get_rect()
 baddieImage = pygame.image.load('image/car2.png')
 sample = [car3,car4,baddieImage]
 WALLHEIGHT = 300 # or any other value you like
@@ -100,7 +107,7 @@ while count>0:
             if event.type == QUIT:
                 terminate()
             if event.type == KEYDOWN:
-                if event.key == ord('q'):
+                if event.key == ord('e'):
                     reverseCheat = True
                 if event.key == K_CAPSLOCK:
                     slowCheat = True
@@ -117,7 +124,7 @@ while count>0:
                     moveUp = False
                     moveDown = True
             if event.type == KEYUP:
-                if event.key == ord('q'):
+                if event.key == ord('e'):
                     reverseCheat = False
                     score =0
                 if event.key == K_CAPSLOCK:
@@ -135,12 +142,18 @@ while count>0:
                     moveDown = False
                 if event.key == K_ESCAPE:
                     pause_game()
+                if event.key == ord('q'):
+                    current_track_index += 1
+                    if current_track_index >= len(music_files):
+                        current_track_index = 0
+                    pygame.mixer.music.load(music_files[current_track_index])
+                    pygame.mixer.music.play()
         if not reverseCheat and not slowCheat:
             baddieAddCounter += 2
         if baddieAddCounter == ADDNEWBADDIERATE:
             baddieAddCounter = 0
             baddieSize =30
-            newBaddie = {'rect': pygame.Rect(random.randint(140, 485), 0 - baddieSize, 23, 47),
+            newBaddie = {'rect': pygame.Rect(random.randint(140, 485), 0 - baddieSize, 15, 30),
                         'speed': random.randint(BADDIEMINSPEED, BADDIEMAXSPEED),
                         'surface':pygame.transform.scale(random.choice(sample), (23, 47)),
                         }
@@ -184,11 +197,10 @@ while count>0:
             windowSurface.blit(b['surface'], b['rect'])
         pygame.display.update()
         if score == 5000:
-                    drawText('Win!', font, windowSurface, (WINDOWWIDTH / 3) + 80, (WINDOWHEIGHT / 3))
-                    pudge = pygame.mixer.Sound('music/pudge.mp3')
-                    pudge.play()
-                    time.sleep(18)
-                    terminate()
+            pygame.mixer.music.stop()
+            pudge = pygame.mixer.Sound('music/pudge.mp3')
+            pudge.play()
+            terminate()
         if playerHasHitBaddie(playerRect, baddies):
             if score > topScore:
                 g=open("data/save.dat",'w')
