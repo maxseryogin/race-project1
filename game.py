@@ -10,20 +10,80 @@ BADDIEMINSPEED = 6
 BADDIEMAXSPEED = 6
 ADDNEWBADDIERATE = 8
 PLAYERMOVERATE = 8
+WHITE = (255, 255, 255)
+GRAY = (128, 128, 128)
+BLACK = (0, 0, 0)
 count=3
 colors = [(105,105,105)]
+button_rect = pygame.Rect(150, 350, 200, 100)
+button_rect_ = pygame.Rect(500, 350, 200, 100)
+button_rect1 = pygame.Rect(300, 350, 200, 100)
 def terminate():
     pygame.quit()
     sys.exit()
 def waitForPlayerToPressKey():
+    drawText('Нажмите любую кнопку для старта.(кроме Delete.=))', font, windowSurface, (WINDOWWIDTH / 3) - 30,(WINDOWHEIGHT / 3))
+    exit_button = pygame.Surface((100, 50))
+    exit_button.fill(WHITE)
+    exit_button_rect = exit_button.get_rect()
+    exit_button_rect.topleft = (10, 10)
+    exit_text = font.render("Выход", True, BLACK)
+    exit_text_rect = exit_text.get_rect()
+    exit_text_rect.center = exit_button_rect.center
+    help_button = pygame.Surface((100, 50))
+    help_button.fill(WHITE)
+    help_button_rect = help_button.get_rect()
+    help_button_rect.topleft = (120, 10)
+    help_text = font.render("Справка", True, BLACK)
+    help_text_rect = help_text.get_rect()
+    help_text_rect.center = help_button_rect.center
+    back_button = pygame.Surface((100, 50))
+    back_button.fill(WHITE)
+    back_button_rect = back_button.get_rect()
+    back_button_rect.topleft = (10, 10)
+    in_menu = True
+    instruction_text = ['W, UP - вверх', 'S, DOWN - вниз', 'A, LEFT - влево', 'D, RIGHT - вправо','CAPSLOCK - замедление времени', 'Q - локальное "радио"', 'E - отмотка времени']
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
-                terminate()
-            if event.type == KEYDOWN:
+                pygame.quit()
+                sys.exit()
+            elif event.type == KEYDOWN:
                 if event.key == K_DELETE:
-                    terminate()
-                return
+                    pygame.quit()
+                    sys.exit()
+                else:
+                    return  # Exit the function and start the game
+            elif event.type == MOUSEBUTTONUP:
+                if event.button == 1:
+                    if in_menu:
+                        if exit_button_rect.collidepoint(event.pos):
+                            pygame.quit()
+                            sys.exit()
+                        elif help_button_rect.collidepoint(event.pos):
+                            windowSurface.fill(GRAY)
+                            windowSurface.blit(back_button, back_button_rect)
+                            for i, text in enumerate(instruction_text):
+                                instruction = font.render(text, True, BLACK)
+                                instruction_rect = instruction.get_rect()
+                                instruction_rect.centerx = windowSurface.get_rect().centerx
+                                instruction_rect.top = 50 + i * 30
+                                windowSurface.blit(instruction, instruction_rect)
+                            in_menu = False
+                    else:
+                        if back_button_rect.collidepoint(event.pos):
+                            windowSurface.fill(BLACK)
+                            drawText('Нажмите любую кнопку для старта.(кроме Delete.=))', font, windowSurface,(WINDOWWIDTH / 3) - 30, (WINDOWHEIGHT / 3))
+                            windowSurface.blit(exit_button, exit_button_rect)
+                            windowSurface.blit(help_button, help_button_rect)
+                            windowSurface.blit(exit_text, exit_text_rect)
+                            windowSurface.blit(help_text, help_text_rect)
+                            in_menu = True
+        windowSurface.blit(exit_button, exit_button_rect)
+        windowSurface.blit(help_button, help_button_rect)
+        windowSurface.blit(exit_text, exit_text_rect)
+        windowSurface.blit(help_text, help_text_rect)
+        pygame.display.update()
 def playerHasHitBaddie(playerRect, baddies):
     for b in baddies:
         if playerRect.colliderect(b['rect']):
@@ -40,27 +100,38 @@ def pause_game():
         for event in pygame.event.get():
             if event.type == QUIT:
                 terminate()
-            if event.type == KEYDOWN:
-                if event.key == K_4:
-                    paused = not paused
-                elif event.key == K_ESCAPE:
-                    terminate()
         if paused:
-            windowSurface.fill((250,100,0))
-            drawText('Пауза', font, windowSurface, (WINDOWWIDTH / 3), (WINDOWHEIGHT / 3))
-            drawText('Нажмите 4 чтобы продолжить или ESC чтобы выйти в главное меню', font, windowSurface, (WINDOWWIDTH / 3) - 110, (WINDOWHEIGHT / 3) + 50)
+            windowSurface.fill((0,0,0))
+            pygame.draw.rect(windowSurface, (0, 155, 255), button_rect)
+            pygame.draw.rect(windowSurface, (0, 155, 255), button_rect_)
+            drawText('Пауза', font, windowSurface, (WINDOWWIDTH / 2.2), (WINDOWHEIGHT / 3))
+            drawText('Нажмите чтобы продолжить или чтобы выйти', font, windowSurface, (WINDOWWIDTH / 2.6) - 110, (WINDOWHEIGHT / 3) + 50)
+            if button_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+                pygame.draw.rect(windowSurface, (0, 155, 255), button_rect)
+                paused = not paused
+            elif button_rect_.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+                pygame.draw.rect(windowSurface, (0, 155, 255), button_rect_)
+                terminate()
+            else:
+                pygame.draw.rect(windowSurface, (0, 155, 255), button_rect)
+                pygame.draw.rect(windowSurface, (0, 155, 255), button_rect_)
+                button_text = font.render('Продолжить', True, (255, 255, 255))
+                text_rect = button_text.get_rect(center=button_rect.center)
+                button_text_ = font.render('Выйти', True, (255, 255, 255))
+                text_rect_ = button_text.get_rect(center=button_rect_.center)
+                windowSurface.blit(button_text, text_rect)
+                windowSurface.blit(button_text_, text_rect_)
         pygame.display.update()
         mainClock.tick(FPS)
 pygame.init()
 pygame.mixer.init()
+font = pygame.font.SysFont(None, 30)
 music_files = ['music/music1.mp3','music/music2.mp3','music/music3.mp3','music/music4.mp3','music/music5.mp3','music/music6.mp3','music/music7.mp3','music/music8.mp3','music/music9.mp3','music/music10.mp3','music/music11.mp3']
 current_track_index = 0
 pygame.mixer.music.load(music_files[current_track_index])
 mainClock = pygame.time.Clock()
 windowSurface = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
 pygame.display.set_caption('Гонки')
-pygame.mouse.set_visible(False)
-font = pygame.font.SysFont(None, 30)
 gameOverSound = pygame.mixer.Sound('music/crash.wav')
 pygame.mixer.music.load('music/car.mp3')
 laugh = pygame.mixer.Sound('music/lose.mp3')
@@ -82,7 +153,6 @@ wallRight = pygame.image.load('image/right.png')
 wallRightRect = wallRight.get_rect()
 wallRightRect.bottom = WINDOWHEIGHT - 100 # or any other value you like
 wallRightRect.right = WINDOWWIDTH
-drawText('Нажмите любую кнопку для старта.(кроме Delete.=))', font, windowSurface, (WINDOWWIDTH / 3) - 30, (WINDOWHEIGHT / 3))
 pygame.display.update()
 waitForPlayerToPressKey()
 zero=0
@@ -102,7 +172,7 @@ while count>0:
     baddieAddCounter = 0
     pygame.mixer.music.play(-1, 0.0)
     while True:
-        score += 10
+        score += 5
         for event in pygame.event.get():
             if event.type == QUIT:
                 terminate()
@@ -126,7 +196,7 @@ while count>0:
             if event.type == KEYUP:
                 if event.key == ord('e'):
                     reverseCheat = False
-                    score =0
+                    score = 0
                 if event.key == K_CAPSLOCK:
                     slowCheat = False
                     score = 0
@@ -155,7 +225,7 @@ while count>0:
             baddieSize =30
             newBaddie = {'rect': pygame.Rect(random.randint(140, 485), 0 - baddieSize, 15, 30),
                         'speed': random.randint(BADDIEMINSPEED, BADDIEMAXSPEED),
-                        'surface':pygame.transform.scale(random.choice(sample), (23, 47)),
+                        'surface':pygame.transform.scale(random.choice(sample), (15, 30)),
                         }
             baddies.append(newBaddie)
             sideLeft= {'rect': pygame.Rect(0,0,126,600),
@@ -218,7 +288,6 @@ while count>0:
         drawText('Игра окончена.', font, windowSurface, (WINDOWWIDTH / 3), (WINDOWHEIGHT / 3))
         drawText('Игра рестартается сама.:)', font, windowSurface, (WINDOWWIDTH / 3) - 80, (WINDOWHEIGHT / 3) + 30)
         pygame.display.update()
-        time.sleep(4)
         waitForPlayerToPressKey()
         count=3
         gameOverSound.stop()
