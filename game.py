@@ -2,7 +2,7 @@ import pygame,time,random,sys,os
 from pygame.locals import *
 WINDOWWIDTH = 800
 WINDOWHEIGHT = 700
-TEXTCOLOR = (225, 20, 50)
+TEXTCOLOR = (255, 255, 0)
 FPS = 60
 BADDIEMINSIZE = 35
 BADDIEMAXSIZE = 35
@@ -13,7 +13,7 @@ PLAYERMOVERATE = 8
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 BLACK = (0, 0, 0)
-count=3
+count=1000
 colors = [(105,105,105)]
 button_rect = pygame.Rect(150, 350, 200, 100)
 button_rect_ = pygame.Rect(500, 350, 200, 100)
@@ -104,7 +104,7 @@ def pause_game():
             windowSurface.fill((0,0,0))
             pygame.draw.rect(windowSurface, (0, 155, 255), button_rect)
             pygame.draw.rect(windowSurface, (0, 155, 255), button_rect_)
-            drawText('Пауза', font, windowSurface, (WINDOWWIDTH / 2.2), (WINDOWHEIGHT / 3))
+            drawText('ПАУЗА', font, windowSurface, (WINDOWWIDTH / 2.2), (WINDOWHEIGHT / 3))
             drawText('Нажмите чтобы продолжить или чтобы выйти', font, windowSurface, (WINDOWWIDTH / 2.6) - 110, (WINDOWHEIGHT / 3) + 50)
             if button_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
                 pygame.draw.rect(windowSurface, (0, 155, 255), button_rect)
@@ -144,18 +144,20 @@ car3 = pygame.image.load('image/car3.png')
 car4 = pygame.image.load('image/car4.png')
 baddieImage = pygame.image.load('image/car2.png')
 sample = [car3,car4,baddieImage]
-WALLHEIGHT = 300 # or any other value you like
+WALLHEIGHT = 300
 wallLeft = pygame.image.load('image/left.png')
 wallLeftRect = wallLeft.get_rect()
-wallLeftRect.bottom = WINDOWHEIGHT - 100 # or any other value you like
+wallLeftRect.bottom = WINDOWHEIGHT - 100
 wallLeftRect.left = 0
 wallRight = pygame.image.load('image/right.png')
 wallRightRect = wallRight.get_rect()
-wallRightRect.bottom = WINDOWHEIGHT - 100 # or any other value you like
+wallRightRect.bottom = WINDOWHEIGHT - 100
 wallRightRect.right = WINDOWWIDTH
 pygame.display.update()
 waitForPlayerToPressKey()
 zero=0
+pygame.mixer.music.load(music_files[random.randint(0,10)])
+pygame.mixer.music.play()
 if not os.path.exists("data/save.dat"):
     f=open("data/save.dat",'w')
     f.write(str(zero))
@@ -261,7 +263,6 @@ while count>0:
         windowSurface.blit(wallRight, wallRightRect)
         drawText('Счет: %s' % (score), font, windowSurface, 200, 0)
         drawText('Лучший счет: %s' % (topScore), font, windowSurface,200, 20)
-        drawText('Жизни: %s' % (count), font, windowSurface,200, 40)
         windowSurface.blit(playerImage, playerRect)
         for b in baddies:
             windowSurface.blit(b['surface'], b['rect'])
@@ -284,9 +285,6 @@ while count>0:
     gameOverSound.play()
     time.sleep(1)
     if count==0:
-        laugh.play()
-        drawText('Игра окончена.', font, windowSurface, (WINDOWWIDTH / 3), (WINDOWHEIGHT / 3))
-        drawText('Игра рестартается сама.:)', font, windowSurface, (WINDOWWIDTH / 3) - 80, (WINDOWHEIGHT / 3) + 30)
         pygame.display.update()
         waitForPlayerToPressKey()
         count=3
