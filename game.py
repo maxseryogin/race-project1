@@ -13,16 +13,23 @@ PLAYERMOVERATE = 8
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 BLACK = (0, 0, 0)
-count=3
+count=1000
 colors = [(105,105,105)]
 button_rect = pygame.Rect(150, 350, 200, 100)
 button_rect_ = pygame.Rect(500, 350, 200, 100)
-button_rect1 = pygame.Rect(300, 350, 200, 100)
+plus_button_rect = pygame.Rect(650, 50, 50, 50)
+minus_button_rect = pygame.Rect(750, 50, 50, 50)
 def terminate():
     pygame.quit()
     sys.exit()
 def waitForPlayerToPressKey():
-    drawText('Нажмите любую кнопку для старта.(кроме Delete.=))', font, windowSurface, (WINDOWWIDTH / 3) - 30,(WINDOWHEIGHT / 3))
+    start_button = pygame.Surface((100, 50))
+    start_button.fill(WHITE)
+    start_button_rect = start_button.get_rect()
+    start_button_rect.center = (WINDOWWIDTH / 2, WINDOWHEIGHT / 2)
+    start_text = font.render("Начать", True, BLACK)
+    start_text_rect = start_text.get_rect()
+    start_text_rect.center = start_button_rect.center
     exit_button = pygame.Surface((100, 50))
     exit_button.fill(WHITE)
     exit_button_rect = exit_button.get_rect()
@@ -42,7 +49,7 @@ def waitForPlayerToPressKey():
     back_button_rect = back_button.get_rect()
     back_button_rect.topleft = (10, 10)
     in_menu = True
-    instruction_text = ['W, UP - вверх', 'S, DOWN - вниз', 'A, LEFT - влево', 'D, RIGHT - вправо','CAPSLOCK - замедление времени', 'Q - локальное "радио"', 'E - отмотка времени']
+    instruction_text = ['W, UP - вверх', 'S, DOWN - вниз', 'A, LEFT - влево', 'D, RIGHT - вправо','CAPSLOCK - замедление времени', 'Q - локальное "радио"', 'E - отмотка времени','']
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -52,11 +59,11 @@ def waitForPlayerToPressKey():
                 if event.key == K_DELETE:
                     pygame.quit()
                     sys.exit()
-                else:
-                    return  # Exit the function and start the game
             elif event.type == MOUSEBUTTONUP:
                 if event.button == 1:
-                    if in_menu:
+                    if start_button_rect.collidepoint(event.pos):
+                        return  # Exit the function and start the game
+                    elif in_menu:
                         if exit_button_rect.collidepoint(event.pos):
                             pygame.quit()
                             sys.exit()
@@ -73,16 +80,20 @@ def waitForPlayerToPressKey():
                     else:
                         if back_button_rect.collidepoint(event.pos):
                             windowSurface.fill(BLACK)
-                            drawText('Нажмите любую кнопку для старта.(кроме Delete.=))', font, windowSurface,(WINDOWWIDTH / 3) - 30, (WINDOWHEIGHT / 3))
                             windowSurface.blit(exit_button, exit_button_rect)
                             windowSurface.blit(help_button, help_button_rect)
+                            windowSurface.blit(start_button, start_button_rect)
                             windowSurface.blit(exit_text, exit_text_rect)
                             windowSurface.blit(help_text, help_text_rect)
+                            windowSurface.blit(start_text, start_text_rect)
                             in_menu = True
+        windowSurface.fill(BLACK)
         windowSurface.blit(exit_button, exit_button_rect)
         windowSurface.blit(help_button, help_button_rect)
+        windowSurface.blit(start_button, start_button_rect)
         windowSurface.blit(exit_text, exit_text_rect)
         windowSurface.blit(help_text, help_text_rect)
+        windowSurface.blit(start_text, start_text_rect)
         pygame.display.update()
 def playerHasHitBaddie(playerRect, baddies):
     for b in baddies:
@@ -96,33 +107,57 @@ def drawText(text, font, surface, x, y):
     surface.blit(textobj, textrect)
 def pause_game():
     paused = True
+    volume = 0.5  # initial volume
     while paused:
         for event in pygame.event.get():
             if event.type == QUIT:
                 terminate()
         if paused:
-            windowSurface.fill((0,0,0))
+            windowSurface.fill((0, 0, 0))
             pygame.draw.rect(windowSurface, (0, 155, 255), button_rect)
             pygame.draw.rect(windowSurface, (0, 155, 255), button_rect_)
-            drawText('Пауза', font, windowSurface, (WINDOWWIDTH / 2.2), (WINDOWHEIGHT / 3))
-            drawText('Нажмите чтобы продолжить или чтобы выйти', font, windowSurface, (WINDOWWIDTH / 2.6) - 110, (WINDOWHEIGHT / 3) + 50)
+            drawText('ПАУЗА', font, windowSurface, (WINDOWWIDTH / 2.2), (WINDOWHEIGHT / 3))
+            drawText('Нажмите чтобы продолжить или чтобы выйти', font, windowSurface, (WINDOWWIDTH / 2.6) - 110,(WINDOWHEIGHT / 3) + 50)
+            pygame.draw.rect(windowSurface, (0, 155, 255), plus_button_rect)
+            pygame.draw.rect(windowSurface, (0, 155, 255), minus_button_rect)
+            drawText('Громкость', font, windowSurface, 675, 20)
+            drawText(str(int(volume * 100)), font, windowSurface, 713, 64)
             if button_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
                 pygame.draw.rect(windowSurface, (0, 155, 255), button_rect)
                 paused = not paused
             elif button_rect_.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
                 pygame.draw.rect(windowSurface, (0, 155, 255), button_rect_)
                 terminate()
+            elif plus_button_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+                pygame.draw.rect(windowSurface, (0, 155, 255), plus_button_rect)
+                if volume < 1.0:
+                    volume += 0.1
+                    pygame.mixer.music.set_volume(volume)
+                    pygame.time.delay(200)
+            elif minus_button_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+                pygame.draw.rect(windowSurface, (0, 155, 255), minus_button_rect)
+                if volume > 0.0:
+                    volume -= 0.1
+                    pygame.mixer.music.set_volume(volume)
+                    pygame.time.delay(200)
             else:
                 pygame.draw.rect(windowSurface, (0, 155, 255), button_rect)
                 pygame.draw.rect(windowSurface, (0, 155, 255), button_rect_)
+                pygame.draw.rect(windowSurface, (0, 155, 255), plus_button_rect)
+                pygame.draw.rect(windowSurface, (0, 155, 255), minus_button_rect)
                 button_text = font.render('Продолжить', True, (255, 255, 255))
                 text_rect = button_text.get_rect(center=button_rect.center)
-                button_text_ = font.render('Выйти', True, (255, 255, 255))
-                text_rect_ = button_text.get_rect(center=button_rect_.center)
                 windowSurface.blit(button_text, text_rect)
+                button_text_ = font.render('Выйти', True, (255, 255, 255))
+                text_rect_ = button_text_.get_rect(center=button_rect_.center)
                 windowSurface.blit(button_text_, text_rect_)
-        pygame.display.update()
-        mainClock.tick(FPS)
+                plus_button_text = font.render('+', True, (255, 255, 255))
+                plus_text_rect = plus_button_text.get_rect(center=plus_button_rect.center)
+                windowSurface.blit(plus_button_text, plus_text_rect)
+                minus_button_text = font.render('-', True, (255, 255, 255))
+                minus_text_rect = minus_button_text.get_rect(center=minus_button_rect.center)
+                windowSurface.blit(minus_button_text, minus_text_rect)
+                pygame.display.update()
 pygame.init()
 pygame.mixer.init()
 font = pygame.font.SysFont(None, 30)
@@ -156,6 +191,8 @@ wallRightRect.right = WINDOWWIDTH
 pygame.display.update()
 waitForPlayerToPressKey()
 zero=0
+pygame.mixer.music.load(music_files[random.randint(0,10)])
+pygame.mixer.music.play()
 if not os.path.exists("data/save.dat"):
     f=open("data/save.dat",'w')
     f.write(str(zero))
@@ -261,16 +298,10 @@ while count>0:
         windowSurface.blit(wallRight, wallRightRect)
         drawText('Счет: %s' % (score), font, windowSurface, 200, 0)
         drawText('Лучший счет: %s' % (topScore), font, windowSurface,200, 20)
-        drawText('Жизни: %s' % (count), font, windowSurface,200, 40)
         windowSurface.blit(playerImage, playerRect)
         for b in baddies:
             windowSurface.blit(b['surface'], b['rect'])
         pygame.display.update()
-        if score == 5000:
-            pygame.mixer.music.stop()
-            pudge = pygame.mixer.Sound('music/pudge.mp3')
-            pudge.play()
-            terminate()
         if playerHasHitBaddie(playerRect, baddies):
             if score > topScore:
                 g=open("data/save.dat",'w')
@@ -283,11 +314,3 @@ while count>0:
     count=count-1
     gameOverSound.play()
     time.sleep(1)
-    if count==0:
-        laugh.play()
-        drawText('Игра окончена.', font, windowSurface, (WINDOWWIDTH / 3), (WINDOWHEIGHT / 3))
-        drawText('Игра рестартается сама.:)', font, windowSurface, (WINDOWWIDTH / 3) - 80, (WINDOWHEIGHT / 3) + 30)
-        pygame.display.update()
-        waitForPlayerToPressKey()
-        count=3
-        gameOverSound.stop()
