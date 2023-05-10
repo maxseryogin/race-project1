@@ -19,10 +19,12 @@ button_rect = pygame.Rect(150, 350, 200, 100)
 button_rect_ = pygame.Rect(500, 350, 200, 100)
 plus_button_rect = pygame.Rect(650, 50, 50, 50)
 minus_button_rect = pygame.Rect(750, 50, 50, 50)
+a = 1
 def terminate():
     pygame.quit()
     sys.exit()
 def waitForPlayerToPressKey():
+    global a
     start_button = pygame.Surface((100, 50))
     start_button.fill(WHITE)
     start_button_rect = start_button.get_rect()
@@ -48,21 +50,30 @@ def waitForPlayerToPressKey():
     back_button.fill(WHITE)
     back_button_rect = back_button.get_rect()
     back_button_rect.topleft = (10, 10)
+    control_button = pygame.Surface((100, 50))
+    control_button.fill(GRAY)
+    control_button_rect = control_button.get_rect()
+    control_button_rect.center = (550, 450)
+    control_text = font.render("Мышка", True, BLACK)
+    control_text_rect = control_text.get_rect()
+    control_text_rect.center = control_button_rect.center
+    control_button_ = pygame.Surface((100, 50))
+    control_button_.fill(GRAY)
+    control_button_rect_ = control_button_.get_rect()
+    control_button_rect_.center = (700, 450)
+    control_text_ = font.render("Клава", True, BLACK)
+    control_text_rect_ = control_text_.get_rect()
+    control_text_rect_.center = control_button_rect_.center
     in_menu = True
     instruction_text = ['W, UP - вверх', 'S, DOWN - вниз', 'A, LEFT - влево', 'D, RIGHT - вправо','CAPSLOCK - замедление времени', 'Q - локальное "радио"', 'E - отмотка времени','']
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == KEYDOWN:
-                if event.key == K_DELETE:
-                    pygame.quit()
-                    sys.exit()
+                terminate()
             elif event.type == MOUSEBUTTONUP:
                 if event.button == 1:
                     if start_button_rect.collidepoint(event.pos):
-                        return  # Exit the function and start the game
+                        return
                     elif in_menu:
                         if exit_button_rect.collidepoint(event.pos):
                             pygame.quit()
@@ -77,23 +88,37 @@ def waitForPlayerToPressKey():
                                 instruction_rect.top = 50 + i * 30
                                 windowSurface.blit(instruction, instruction_rect)
                             in_menu = False
+                            windowSurface.blit(exit_text,exit_text_rect)
+                        elif control_button_rect.collidepoint(event.pos):
+                            a = 1
+                        elif control_button_rect_.collidepoint(event.pos):
+                            a = 2
                     else:
                         if back_button_rect.collidepoint(event.pos):
                             windowSurface.fill(BLACK)
                             windowSurface.blit(exit_button, exit_button_rect)
                             windowSurface.blit(help_button, help_button_rect)
+                            windowSurface.blit(control_button, control_button_rect)
+                            windowSurface.blit(control_button_, control_button_rect_)
                             windowSurface.blit(start_button, start_button_rect)
                             windowSurface.blit(exit_text, exit_text_rect)
                             windowSurface.blit(help_text, help_text_rect)
                             windowSurface.blit(start_text, start_text_rect)
+                            windowSurface.blit(control_text,control_text_rect)
+                            windowSurface.blit(control_text_, control_text_rect_)
                             in_menu = True
-        windowSurface.fill(BLACK)
-        windowSurface.blit(exit_button, exit_button_rect)
-        windowSurface.blit(help_button, help_button_rect)
-        windowSurface.blit(start_button, start_button_rect)
-        windowSurface.blit(exit_text, exit_text_rect)
-        windowSurface.blit(help_text, help_text_rect)
-        windowSurface.blit(start_text, start_text_rect)
+        if in_menu:
+            windowSurface.fill(BLACK)
+            windowSurface.blit(exit_button, exit_button_rect)
+            windowSurface.blit(help_button, help_button_rect)
+            windowSurface.blit(control_button, control_button_rect)
+            windowSurface.blit(control_button_, control_button_rect_)
+            windowSurface.blit(start_button, start_button_rect)
+            windowSurface.blit(exit_text, exit_text_rect)
+            windowSurface.blit(help_text, help_text_rect)
+            windowSurface.blit(start_text, start_text_rect)
+            windowSurface.blit(control_text, control_text_rect)
+            windowSurface.blit(control_text_, control_text_rect_)
         pygame.display.update()
 def playerHasHitBaddie(playerRect, baddies):
     for b in baddies:
@@ -208,108 +233,194 @@ while count>0:
     reverseCheat = slowCheat = False
     baddieAddCounter = 0
     pygame.mixer.music.play(-1, 0.0)
-    while True:
-        score += 5
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                terminate()
-            if event.type == KEYDOWN:
-                if event.key == ord('e'):
-                    reverseCheat = True
-                if event.key == K_CAPSLOCK:
-                    slowCheat = True
-                if event.key == K_LEFT or event.key == ord('a'):
-                    moveRight = False
-                    moveLeft = True
-                if event.key == K_RIGHT or event.key == ord('d'):
-                    moveLeft = False
-                    moveRight = True
-                if event.key == K_UP or event.key == ord('w'):
-                    moveDown = False
-                    moveUp = True
-                if event.key == K_DOWN or event.key == ord('s'):
-                    moveUp = False
-                    moveDown = True
-            if event.type == KEYUP:
-                if event.key == ord('e'):
-                    reverseCheat = False
-                    score = 0
-                if event.key == K_CAPSLOCK:
-                    slowCheat = False
-                    score = 0
-                if event.key == K_DELETE:
+    if a == 2:
+        while True:
+            score += 5
+            for event in pygame.event.get():
+                if event.type == QUIT:
                     terminate()
-                if event.key == K_LEFT or event.key == ord('a'):
-                    moveLeft = False
-                if event.key == K_RIGHT or event.key == ord('d'):
-                    moveRight = False
-                if event.key == K_UP or event.key == ord('w'):
-                    moveUp = False
-                if event.key == K_DOWN or event.key == ord('s'):
-                    moveDown = False
-                if event.key == K_ESCAPE:
-                    pause_game()
-                if event.key == ord('q'):
-                    current_track_index += 1
-                    if current_track_index >= len(music_files):
-                        current_track_index = 0
-                    pygame.mixer.music.load(music_files[current_track_index])
-                    pygame.mixer.music.play()
-        if not reverseCheat and not slowCheat:
-            baddieAddCounter += 2
-        if baddieAddCounter == ADDNEWBADDIERATE:
-            baddieAddCounter = 0
-            baddieSize =30
-            newBaddie = {'rect': pygame.Rect(random.randint(140, 485), 0 - baddieSize, 15, 30),
-                        'speed': random.randint(BADDIEMINSPEED, BADDIEMAXSPEED),
-                        'surface':pygame.transform.scale(random.choice(sample), (15, 30)),
-                        }
-            baddies.append(newBaddie)
-            sideLeft= {'rect': pygame.Rect(0,0,126,600),
-                       'speed': random.randint(BADDIEMINSPEED, BADDIEMAXSPEED),
-                       'surface':pygame.transform.scale(wallLeft, (126, 599)),
-                       }
-            baddies.append(sideLeft)
-            sideRight= {'rect': pygame.Rect(500,0,203,600),
-                       'speed': random.randint(BADDIEMINSPEED, BADDIEMAXSPEED),
-                       'surface':pygame.transform.scale(wallRight, (303, 580)),
-                       }
-            baddies.append(sideRight)
-        if moveLeft and playerRect.left > 0:
-            playerRect.move_ip(-1 * PLAYERMOVERATE, 0)
-        if moveRight and playerRect.right < WINDOWWIDTH:
-            playerRect.move_ip(PLAYERMOVERATE, 0)
-        if moveUp and playerRect.top > 0:
-            playerRect.move_ip(0, -1 * PLAYERMOVERATE)
-        if moveDown and playerRect.bottom < WINDOWHEIGHT:
-            playerRect.move_ip(0, PLAYERMOVERATE)
-        for b in baddies:
+                if event.type == KEYDOWN:
+                    if event.key == ord('e'):
+                        reverseCheat = True
+                    if event.key == K_CAPSLOCK:
+                        slowCheat = True
+                    if event.key == K_LEFT or event.key == ord('a'):
+                        moveRight = False
+                        moveLeft = True
+                    if event.key == K_RIGHT or event.key == ord('d'):
+                        moveLeft = False
+                        moveRight = True
+                    if event.key == K_UP or event.key == ord('w'):
+                        moveDown = False
+                        moveUp = True
+                    if event.key == K_DOWN or event.key == ord('s'):
+                        moveUp = False
+                        moveDown = True
+                if event.type == KEYUP:
+                    if event.key == ord('e'):
+                        reverseCheat = False
+                        score = 0
+                    if event.key == K_CAPSLOCK:
+                        slowCheat = False
+                        score = 0
+                    if event.key == K_DELETE:
+                        terminate()
+                    if event.key == K_LEFT or event.key == ord('a'):
+                        moveLeft = False
+                    if event.key == K_RIGHT or event.key == ord('d'):
+                        moveRight = False
+                    if event.key == K_UP or event.key == ord('w'):
+                        moveUp = False
+                    if event.key == K_DOWN or event.key == ord('s'):
+                        moveDown = False
+                    if event.key == K_ESCAPE:
+                        pause_game()
+                    if event.key == ord('q'):
+                        current_track_index += 1
+                        if current_track_index >= len(music_files):
+                            current_track_index = 0
+                        pygame.mixer.music.load(music_files[current_track_index])
+                        pygame.mixer.music.play()
             if not reverseCheat and not slowCheat:
-                b['rect'].move_ip(0, b['speed'])
-            elif reverseCheat:
-                b['rect'].move_ip(0, -5)
-            elif slowCheat:
-                b['rect'].move_ip(0, 1)
-        for b in baddies[:]:
-            if b['rect'].top > WINDOWHEIGHT:
-                baddies.remove(b)
-        windowSurface.fill(random.choice(colors))
-        windowSurface.blit(wallLeft, wallLeftRect)
-        windowSurface.blit(wallRight, wallRightRect)
-        drawText('Счет: %s' % (score), font, windowSurface, 200, 0)
-        drawText('Лучший счет: %s' % (topScore), font, windowSurface,200, 20)
-        windowSurface.blit(playerImage, playerRect)
-        for b in baddies:
-            windowSurface.blit(b['surface'], b['rect'])
-        pygame.display.update()
-        if playerHasHitBaddie(playerRect, baddies):
-            if score > topScore:
-                g=open("data/save.dat",'w')
-                g.write(str(score))
-                g.close()
-                topScore = score
-            break
-        mainClock.tick(FPS)
+                baddieAddCounter += 2
+            if baddieAddCounter == ADDNEWBADDIERATE:
+                baddieAddCounter = 0
+                baddieSize =30
+                newBaddie = {'rect': pygame.Rect(random.randint(140, 485), 0 - baddieSize, 15, 30),
+                            'speed': random.randint(BADDIEMINSPEED, BADDIEMAXSPEED),
+                            'surface':pygame.transform.scale(random.choice(sample), (15, 30)),
+                            }
+                baddies.append(newBaddie)
+                sideLeft= {'rect': pygame.Rect(0,0,126,600),
+                           'speed': random.randint(BADDIEMINSPEED, BADDIEMAXSPEED),
+                           'surface':pygame.transform.scale(wallLeft, (126, 599)),
+                           }
+                baddies.append(sideLeft)
+                sideRight= {'rect': pygame.Rect(500,0,203,600),
+                           'speed': random.randint(BADDIEMINSPEED, BADDIEMAXSPEED),
+                           'surface':pygame.transform.scale(wallRight, (303, 580)),
+                           }
+                baddies.append(sideRight)
+            if moveLeft and playerRect.left > 0:
+                playerRect.move_ip(-1 * PLAYERMOVERATE, 0)
+            if moveRight and playerRect.right < WINDOWWIDTH:
+                playerRect.move_ip(PLAYERMOVERATE, 0)
+            if moveUp and playerRect.top > 0:
+                playerRect.move_ip(0, -1 * PLAYERMOVERATE)
+            if moveDown and playerRect.bottom < WINDOWHEIGHT:
+                playerRect.move_ip(0, PLAYERMOVERATE)
+            for b in baddies:
+                if not reverseCheat and not slowCheat:
+                    b['rect'].move_ip(0, b['speed'])
+                elif reverseCheat:
+                    b['rect'].move_ip(0, -5)
+                elif slowCheat:
+                    b['rect'].move_ip(0, 1)
+            for b in baddies[:]:
+                if b['rect'].top > WINDOWHEIGHT:
+                    baddies.remove(b)
+            windowSurface.fill(random.choice(colors))
+            windowSurface.blit(wallLeft, wallLeftRect)
+            windowSurface.blit(wallRight, wallRightRect)
+            drawText('Счет: %s' % (score), font, windowSurface, 200, 0)
+            drawText('Лучший счет: %s' % (topScore), font, windowSurface,200, 20)
+            windowSurface.blit(playerImage, playerRect)
+            for b in baddies:
+                windowSurface.blit(b['surface'], b['rect'])
+            pygame.display.update()
+            if playerHasHitBaddie(playerRect, baddies):
+                if score > topScore:
+                    g=open("data/save.dat",'w')
+                    g.write(str(score))
+                    g.close()
+                    topScore = score
+                break
+            mainClock.tick(FPS)
+    elif a == 1:
+        while True:
+            score += 5
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    terminate()
+                if event.type == KEYDOWN:
+                    if event.key == ord('e'):
+                        reverseCheat = True
+                    if event.key == K_CAPSLOCK:
+                        slowCheat = True
+                    if event.key == K_ESCAPE:
+                        pause_game()
+                if event.type == KEYUP:
+                    if event.key == ord('e'):
+                        reverseCheat = False
+                    if event.key == K_CAPSLOCK:
+                        slowCheat = False
+                    if event.key == ord('q'):
+                        current_track_index += 1
+                        if current_track_index >= len(music_files):
+                            current_track_index = 0
+                        pygame.mixer.music.load(music_files[current_track_index])
+                        pygame.mixer.music.play()
+            mouse_pos = pygame.math.Vector2(pygame.mouse.get_pos())
+            sprite_pos = pygame.math.Vector2(playerRect.center)
+            distance = mouse_pos.distance_to(sprite_pos)
+            if distance > 0:
+                direction = (mouse_pos - sprite_pos).normalize()
+                playerRect.move_ip(direction * min(distance, PLAYERMOVERATE))
+            if not reverseCheat and not slowCheat:
+                baddieAddCounter += 2
+            if baddieAddCounter == ADDNEWBADDIERATE:
+                baddieAddCounter = 0
+                baddieSize = 30
+                newBaddie = {'rect': pygame.Rect(random.randint(140, 485), 0 - baddieSize, 15, 30),
+                             'speed': random.randint(BADDIEMINSPEED, BADDIEMAXSPEED),
+                             'surface': pygame.transform.scale(random.choice(sample), (15, 30)),
+                             }
+                baddies.append(newBaddie)
+                sideLeft = {'rect': pygame.Rect(0, 0, 126, 600),
+                            'speed': random.randint(BADDIEMINSPEED, BADDIEMAXSPEED),
+                            'surface': pygame.transform.scale(wallLeft, (126, 599)),
+                            }
+                baddies.append(sideLeft)
+                sideRight = {'rect': pygame.Rect(500, 0, 203, 600),
+                             'speed': random.randint(BADDIEMINSPEED, BADDIEMAXSPEED),
+                             'surface': pygame.transform.scale(wallRight, (303, 580)),
+                             }
+                baddies.append(sideRight)
+            if moveLeft and playerRect.left > 0:
+                playerRect.move_ip(-1 * PLAYERMOVERATE, 0)
+            if moveRight and playerRect.right < WINDOWWIDTH:
+                playerRect.move_ip(PLAYERMOVERATE, 0)
+            if moveUp and playerRect.top > 0:
+                playerRect.move_ip(0, -1 * PLAYERMOVERATE)
+            if moveDown and playerRect.bottom < WINDOWHEIGHT:
+                playerRect.move_ip(0, PLAYERMOVERATE)
+            for b in baddies:
+                if not reverseCheat and not slowCheat:
+                    b['rect'].move_ip(0, b['speed'])
+                elif reverseCheat:
+                    b['rect'].move_ip(0, -5)
+                elif slowCheat:
+                    b['rect'].move_ip(0, 1)
+            for b in baddies[:]:
+                if b['rect'].top > WINDOWHEIGHT:
+                    baddies.remove(b)
+            windowSurface.fill(random.choice(colors))
+            windowSurface.blit(wallLeft, wallLeftRect)
+            windowSurface.blit(wallRight, wallRightRect)
+            drawText('Счет: %s' % (score), font, windowSurface, 200, 0)
+            drawText('Лучший счет: %s' % (topScore), font, windowSurface, 200, 20)
+            windowSurface.blit(playerImage, playerRect)
+            for b in baddies:
+                windowSurface.blit(b['surface'], b['rect'])
+            pygame.display.update()
+            if playerHasHitBaddie(playerRect, baddies):
+                if score > topScore:
+                    g = open("data/save.dat", 'w')
+                    g.write(str(score))
+                    g.close()
+                    topScore = score
+                break
+            mainClock.tick(FPS)
     pygame.mixer.music.stop()
     count=count-1
     gameOverSound.play()
