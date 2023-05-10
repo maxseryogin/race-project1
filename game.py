@@ -9,7 +9,7 @@ BADDIEMAXSIZE = 35
 BADDIEMINSPEED = 6
 BADDIEMAXSPEED = 6
 ADDNEWBADDIERATE = 8
-PLAYERMOVERATE = 8
+PLAYERMOVERATE = 98
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 BLACK = (0, 0, 0)
@@ -24,7 +24,7 @@ def terminate():
     pygame.quit()
     sys.exit()
 def waitForPlayerToPressKey():
-    global a
+    global a, PLAYERMOVERATE
     start_button = pygame.Surface((100, 50))
     start_button.fill(WHITE)
     start_button_rect = start_button.get_rect()
@@ -65,7 +65,7 @@ def waitForPlayerToPressKey():
     control_text_rect_ = control_text_.get_rect()
     control_text_rect_.center = control_button_rect_.center
     in_menu = True
-    instruction_text = ['W, UP - вверх', 'S, DOWN - вниз', 'A, LEFT - влево', 'D, RIGHT - вправо','CAPSLOCK - замедление времени', 'Q - локальное "радио"', 'E - отмотка времени','']
+    instruction_text = ['W, UP - вверх', 'S, DOWN - вниз', 'A, LEFT - влево', 'D, RIGHT - вправо','CAPSLOCK - замедление времени', 'Q - локальное "радио"', 'E - отмотка времени','ESC - пауза']
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -91,8 +91,10 @@ def waitForPlayerToPressKey():
                             windowSurface.blit(exit_text,exit_text_rect)
                         elif control_button_rect.collidepoint(event.pos):
                             a = 1
+                            PLAYERMOVERATE = 100
                         elif control_button_rect_.collidepoint(event.pos):
                             a = 2
+                            PLAYERMOVERATE = 8
                     else:
                         if back_button_rect.collidepoint(event.pos):
                             windowSurface.fill(BLACK)
@@ -286,12 +288,17 @@ while count>0:
             if baddieAddCounter == ADDNEWBADDIERATE:
                 baddieAddCounter = 0
                 baddieSize =30
-                newBaddie = {'rect': pygame.Rect(random.randint(140, 485), 0 - baddieSize, 15, 30),
-                            'speed': random.randint(BADDIEMINSPEED, BADDIEMAXSPEED),
-                            'surface':pygame.transform.scale(random.choice(sample), (15, 30)),
-                            }
+                last_spawn_time = 0
+                if pygame.time.get_ticks() - last_spawn_time > 1000:
+                    newBaddie = {'rect': pygame.Rect(random.randint(140, 485), 0 - baddieSize, 15, 30),
+                                 'speed': random.randint(BADDIEMINSPEED, BADDIEMAXSPEED),
+                                 'surface': pygame.transform.scale(random.choice(sample), (15, 30)),
+                                 }
+                    last_spawn_time = pygame.time.get_ticks()
+                else:
+                    newBaddie = None
                 baddies.append(newBaddie)
-                sideLeft= {'rect': pygame.Rect(0,0,126,600),
+                sideLeft = {'rect': pygame.Rect(0,0,126,600),
                            'speed': random.randint(BADDIEMINSPEED, BADDIEMAXSPEED),
                            'surface':pygame.transform.scale(wallLeft, (126, 599)),
                            }
