@@ -4,12 +4,12 @@ WINDOWWIDTH = 800
 WINDOWHEIGHT = 700
 TEXTCOLOR = (225, 20, 50)
 FPS = 60
-BADDIEMINSIZE = 35
-BADDIEMAXSIZE = 35
+BADDIEMINSIZE = 20
+BADDIEMAXSIZE = 15
 BADDIEMINSPEED = 6
 BADDIEMAXSPEED = 6
-ADDNEWBADDIERATE = 8
-PLAYERMOVERATE = 98
+ADDNEWBADDIERATE = 6
+PLAYERMOVERATE = 8
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 BLACK = (0, 0, 0)
@@ -50,22 +50,25 @@ def waitForPlayerToPressKey():
     back_button.fill(WHITE)
     back_button_rect = back_button.get_rect()
     back_button_rect.topleft = (10, 10)
+    back_text = font.render("Назад", True, BLACK)
+    back_text_rect = exit_text.get_rect()
+    back_text_rect.center = back_button_rect.center
     control_button = pygame.Surface((100, 50))
     control_button.fill(GRAY)
     control_button_rect = control_button.get_rect()
-    control_button_rect.center = (550, 450)
+    control_button_rect.center = (580, 600)
     control_text = font.render("Мышка", True, BLACK)
     control_text_rect = control_text.get_rect()
     control_text_rect.center = control_button_rect.center
     control_button_ = pygame.Surface((100, 50))
     control_button_.fill(GRAY)
     control_button_rect_ = control_button_.get_rect()
-    control_button_rect_.center = (700, 450)
+    control_button_rect_.center = (700, 600)
     control_text_ = font.render("Клава", True, BLACK)
     control_text_rect_ = control_text_.get_rect()
     control_text_rect_.center = control_button_rect_.center
     in_menu = True
-    instruction_text = ['W, UP - вверх', 'S, DOWN - вниз', 'A, LEFT - влево', 'D, RIGHT - вправо','CAPSLOCK - замедление времени', 'Q - локальное "радио"', 'E - отмотка времени','ESC - пауза']
+    instruction_text = ['W, UP - вверх', 'S, DOWN - вниз', 'A, LEFT - влево', 'D, RIGHT - вправо','CAPSLOCK - замедление времени', 'Q - локальное "радио"','R - остановить радио', 'E - отмотка времени','ESC - пауза']
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -88,7 +91,7 @@ def waitForPlayerToPressKey():
                                 instruction_rect.top = 50 + i * 30
                                 windowSurface.blit(instruction, instruction_rect)
                             in_menu = False
-                            windowSurface.blit(exit_text,exit_text_rect)
+                            windowSurface.blit(back_text, back_text_rect)
                         elif control_button_rect.collidepoint(event.pos):
                             a = 1
                             PLAYERMOVERATE = 100
@@ -123,8 +126,11 @@ def waitForPlayerToPressKey():
             windowSurface.blit(control_text_, control_text_rect_)
         pygame.display.update()
 def playerHasHitBaddie(playerRect, baddies):
+    global score_
     for b in baddies:
         if playerRect.colliderect(b['rect']):
+            if score_ >= 1000:
+                return False
             return True
     return False
 def drawText(text, font, surface, x, y):
@@ -134,7 +140,7 @@ def drawText(text, font, surface, x, y):
     surface.blit(textobj, textrect)
 def pause_game():
     paused = True
-    volume = 0.5  # initial volume
+    volume = 0.1  # initial volume
     while paused:
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -227,6 +233,7 @@ if not os.path.exists("data/save.dat"):
 v=open("data/save.dat",'r')
 topScore = int(v.readline())
 v.close()
+score_ = 0
 while count>0:
     baddies = []
     score = 0
@@ -235,9 +242,13 @@ while count>0:
     reverseCheat = slowCheat = False
     baddieAddCounter = 0
     pygame.mixer.music.play(-1, 0.0)
+    score_ = 0
     if a == 2:
         while True:
             score += 5
+            score_ += 5
+            if score_ == 2000:
+                score_ = 0
             for event in pygame.event.get():
                 if event.type == QUIT:
                     terminate()
@@ -265,8 +276,6 @@ while count>0:
                     if event.key == K_CAPSLOCK:
                         slowCheat = False
                         score = 0
-                    if event.key == K_DELETE:
-                        terminate()
                     if event.key == K_LEFT or event.key == ord('a'):
                         moveLeft = False
                     if event.key == K_RIGHT or event.key == ord('d'):
@@ -283,6 +292,8 @@ while count>0:
                             current_track_index = 0
                         pygame.mixer.music.load(music_files[current_track_index])
                         pygame.mixer.music.play()
+                    if event.key == ord('r'):
+                        pygame.mixer.music.stop()
             if not reverseCheat and not slowCheat:
                 baddieAddCounter += 2
             if baddieAddCounter == ADDNEWBADDIERATE:
@@ -330,7 +341,11 @@ while count>0:
             windowSurface.blit(wallLeft, wallLeftRect)
             windowSurface.blit(wallRight, wallRightRect)
             drawText('Счет: %s' % (score), font, windowSurface, 200, 0)
-            drawText('Лучший счет: %s' % (topScore), font, windowSurface,200, 20)
+            if score_ >= 1000:
+                drawText('Бессмертность: %s' % 'Да', font, windowSurface, 200, 40)
+            elif score_ <= 2000:
+                drawText('Бессмертность: %s' % 'Нет', font, windowSurface, 200, 40)
+            drawText('Лучший счет: %s' % (topScore), font, windowSurface, 200, 20)
             windowSurface.blit(playerImage, playerRect)
             for b in baddies:
                 windowSurface.blit(b['surface'], b['rect'])
@@ -346,6 +361,9 @@ while count>0:
     elif a == 1:
         while True:
             score += 5
+            score_ += 5
+            if score_ == 2000:
+                score_ = 0
             for event in pygame.event.get():
                 if event.type == QUIT:
                     terminate()
@@ -415,6 +433,10 @@ while count>0:
             windowSurface.blit(wallLeft, wallLeftRect)
             windowSurface.blit(wallRight, wallRightRect)
             drawText('Счет: %s' % (score), font, windowSurface, 200, 0)
+            if score_ >= 1000:
+                drawText('Бессмертность: %s' % 'Да', font, windowSurface, 200, 40)
+            elif score_ <= 2000:
+                drawText('Бессмертность: %s' % 'Нет', font, windowSurface, 200, 40)
             drawText('Лучший счет: %s' % (topScore), font, windowSurface, 200, 20)
             windowSurface.blit(playerImage, playerRect)
             for b in baddies:
