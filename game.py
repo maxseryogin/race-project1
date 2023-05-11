@@ -68,7 +68,7 @@ def waitForPlayerToPressKey():
     control_text_rect_ = control_text_.get_rect()
     control_text_rect_.center = control_button_rect_.center
     in_menu = True
-    instruction_text = ['W, UP - вверх', 'S, DOWN - вниз', 'A, LEFT - влево', 'D, RIGHT - вправо','CAPSLOCK - замедление времени', 'Q - локальное "радио"','R - остановить радио', 'E - отмотка времени','ESC - пауза']
+    instruction_text = ['W, UP - вверх', 'S, DOWN - вниз', 'A, LEFT - влево', 'D, RIGHT - вправо','CAPSLOCK - замедление времени', 'Q - локальное "радио"','R - остановить радио','V -турбобуст', 'E - отмотка времени','ESC - пауза']
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -269,6 +269,8 @@ while count>0:
                     if event.key == K_DOWN or event.key == ord('s'):
                         moveUp = False
                         moveDown = True
+                    if event.key == K_v:
+                        PLAYERMOVERATE *=4
                 if event.type == KEYUP:
                     if event.key == ord('e'):
                         reverseCheat = False
@@ -284,6 +286,8 @@ while count>0:
                         moveUp = False
                     if event.key == K_DOWN or event.key == ord('s'):
                         moveDown = False
+                    if event.key == K_v:
+                        PLAYERMOVERATE /=4
                     if event.key == K_ESCAPE:
                         pause_game()
                     if event.key == ord('q'):
@@ -374,6 +378,8 @@ while count>0:
                         slowCheat = True
                     if event.key == K_ESCAPE:
                         pause_game()
+                    if event.key == K_v:
+                        PLAYERMOVERATE *= 200
                 if event.type == KEYUP:
                     if event.key == ord('e'):
                         reverseCheat = False
@@ -385,6 +391,8 @@ while count>0:
                             current_track_index = 0
                         pygame.mixer.music.load(music_files[current_track_index])
                         pygame.mixer.music.play()
+                    if event.key == K_v:
+                        PLAYERMOVERATE /= 200
             mouse_pos = pygame.math.Vector2(pygame.mouse.get_pos())
             sprite_pos = pygame.math.Vector2(playerRect.center)
             distance = mouse_pos.distance_to(sprite_pos)
